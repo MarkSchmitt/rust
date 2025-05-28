@@ -108,7 +108,11 @@ unsafe fn _print_fmt(fmt: &mut fmt::Formatter<'_>, print_fmt: PrintFmt) -> fmt::
                     res = bt_fmt.frame().symbol(frame, symbol);
                 }
             });
-            #[cfg(target_os = "nto")]
+            // libc::__my_thread_exit was removed in version 8
+            #[cfg(all(
+                target_os = "nto",
+                any(target_env = "nto71", target_env = "nto71_iosock", target_env = "nto70")
+            ))]
             if libc::__my_thread_exit as *mut libc::c_void == frame.ip() {
                 if !hit && print {
                     use crate::backtrace_rs::SymbolName;
